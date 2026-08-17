@@ -3,13 +3,107 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <link href="/src/style.css" rel="stylesheet">
     <title>Saurabh.dev • 3D Portfolio</title>
-    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=7"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=7">
+    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=9"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=9">
+    <style>
+      html, body {
+        overflow-x: hidden;
+        touch-action: pan-y;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: none;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+
+    <script>
+      // High-Fidelity Touch Momentum Scrolling Engine for Mobile & Tablet
+      (function() {
+        let isTouching = false;
+        let lastTouchY = 0;
+        let lastTouchTime = 0;
+        let velocityY = 0;
+        let momentumRafId = null;
+
+        function stopMomentum() {
+          if (momentumRafId) {
+            cancelAnimationFrame(momentumRafId);
+            momentumRafId = null;
+          }
+          velocityY = 0;
+        }
+
+        function applyScroll(delta) {
+          const maxScroll = (document.documentElement.scrollHeight || 8000) - window.innerHeight;
+          const currentY = window.scrollY || document.documentElement.scrollTop || 0;
+          const nextY = Math.max(0, Math.min(currentY + delta, maxScroll));
+
+          if (window.__lenis && typeof window.__lenis.scrollTo === 'function') {
+            window.__lenis.scrollTo(nextY, { immediate: true });
+          } else {
+            window.scrollTo(0, nextY);
+          }
+        }
+
+        window.addEventListener('touchstart', function(e) {
+          stopMomentum();
+          if (e.touches && e.touches[0]) {
+            lastTouchY = e.touches[0].clientY;
+            lastTouchTime = performance.now();
+            isTouching = true;
+          }
+        }, { passive: true });
+
+        window.addEventListener('touchmove', function(e) {
+          if (!isTouching || !e.touches || !e.touches[0]) return;
+          const currentY = e.touches[0].clientY;
+          const currentTime = performance.now();
+          const dt = Math.max(1, currentTime - lastTouchTime);
+          const dy = lastTouchY - currentY;
+
+          // Direct smooth scroll translation
+          const scrollDelta = dy * 2.2;
+          applyScroll(scrollDelta);
+
+          // Calculate moving velocity
+          velocityY = (scrollDelta / dt) * 16.67; // Normalize to 60fps frame delta
+          lastTouchY = currentY;
+          lastTouchTime = currentTime;
+        }, { passive: true });
+
+        window.addEventListener('touchend', function() {
+          if (!isTouching) return;
+          isTouching = false;
+
+          // If flicked with sufficient velocity, glide smoothly with exponential friction decay
+          if (Math.abs(velocityY) > 1) {
+            let currentV = velocityY * 0.85; // Initial momentum factor
+
+            function coast() {
+              if (Math.abs(currentV) < 0.2 || isTouching) {
+                stopMomentum();
+                return;
+              }
+
+              applyScroll(currentV);
+              currentV *= 0.94; // Smooth realistic friction decay
+              momentumRafId = requestAnimationFrame(coast);
+            }
+
+            momentumRafId = requestAnimationFrame(coast);
+          }
+        }, { passive: true });
+
+        window.addEventListener('touchcancel', function() {
+          isTouching = false;
+          stopMomentum();
+        }, { passive: true });
+      })();
+    </script>
   </body>
 </html>
+

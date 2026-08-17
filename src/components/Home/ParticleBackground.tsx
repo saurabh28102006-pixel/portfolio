@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import { useTheme } from '@/context/ThemeContext';
 
-interface Particle {
+interface MeshNode {
   x: number;
   y: number;
   vx: number;
@@ -11,12 +12,11 @@ interface Particle {
   radius: number;
   color: string;
   glowColor: string;
-  alpha: number;
   pulseSpeed: number;
   pulseOffset: number;
 }
 
-interface ShootingStar {
+interface DataStreak {
   x: number;
   y: number;
   length: number;
@@ -28,7 +28,13 @@ interface ShootingStar {
 }
 
 export function ParticleBackground() {
+  const { isDay } = useTheme();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isDayRef = useRef(isDay);
+
+  useEffect(() => {
+    isDayRef.current = isDay;
+  }, [isDay]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -40,13 +46,13 @@ export function ParticleBackground() {
     let animationFrameId: number;
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
-    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
     const resizeCanvas = () => {
       if (!canvas) return;
       width = window.innerWidth;
       height = window.innerHeight;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       canvas.style.width = `${width}px`;
@@ -55,15 +61,15 @@ export function ParticleBackground() {
     };
 
     resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', resizeCanvas, { passive: true });
 
-    // Mouse Tracking with gentle lerp
+    // Smooth Cursor Tracking with Elastic Damping
     const mouse = {
       x: -1000,
       y: -1000,
       targetX: -1000,
       targetY: -1000,
-      radius: 140
+      radius: 150
     };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -79,51 +85,60 @@ export function ParticleBackground() {
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('mouseleave', handleMouseLeave);
 
-    // Color palette: Ethereal Cyber Cyan, Electric Blue, Violet, Aquamarine
-    const colorPalette = [
-      { fill: '#38bdf8', glow: 'rgba(56, 189, 248, 0.4)' },
-      { fill: '#22d3ee', glow: 'rgba(34, 211, 238, 0.45)' },
-      { fill: '#60a5fa', glow: 'rgba(96, 165, 250, 0.35)' },
-      { fill: '#818cf8', glow: 'rgba(129, 140, 248, 0.3)' },
-      { fill: '#2dd4bf', glow: 'rgba(45, 212, 191, 0.35)' }
+    // Professional Node Color Palettes
+    const nightPalette = [
+      { fill: '#38bdf8', glow: 'rgba(56, 189, 248, 0.45)' }, // Electric Cyan
+      { fill: '#60a5fa', glow: 'rgba(96, 165, 250, 0.4)' },  // Soft Blue
+      { fill: '#818cf8', glow: 'rgba(129, 140, 248, 0.4)' }, // Indigo / Violet
+      { fill: '#22d3ee', glow: 'rgba(34, 211, 238, 0.45)' }, // Radiant Cyan
+      { fill: '#ffffff', glow: 'rgba(255, 255, 255, 0.6)' }  // Pure White
     ];
 
-    const particleCount = window.innerWidth < 768 ? 45 : 90;
-    const particles: Particle[] = [];
+    const dayPalette = [
+      { fill: '#0284c7', glow: 'rgba(2, 132, 199, 0.4)' },
+      { fill: '#2563eb', glow: 'rgba(37, 99, 235, 0.35)' },
+      { fill: '#0ea5e9', glow: 'rgba(14, 165, 233, 0.4)' },
+      { fill: '#4f46e5', glow: 'rgba(79, 70, 229, 0.35)' }
+    ];
 
-    for (let i = 0; i < particleCount; i++) {
-      const col = colorPalette[Math.floor(Math.random() * colorPalette.length)];
-      const baseRadius = Math.random() * 1.8 + 0.8;
-      particles.push({
+    // Responsive Node Count
+    const isMobile = window.innerWidth < 640;
+    const isTablet = window.innerWidth < 1024;
+    const nodeCount = isMobile ? 30 : isTablet ? 45 : 65;
+
+    const nodes: MeshNode[] = [];
+    for (let i = 0; i < nodeCount; i++) {
+      const col = nightPalette[i % nightPalette.length];
+      const baseRadius = Math.random() * 1.5 + 1.0;
+      nodes.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.45,
-        vy: (Math.random() - 0.5) * 0.45,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
         baseRadius,
         radius: baseRadius,
         color: col.fill,
         glowColor: col.glow,
-        alpha: Math.random() * 0.6 + 0.25,
-        pulseSpeed: Math.random() * 0.02 + 0.008,
+        pulseSpeed: Math.random() * 0.02 + 0.01,
         pulseOffset: Math.random() * Math.PI * 2
       });
     }
 
-    // Shooting Stars / Cyber Streaks
-    const shootingStars: ShootingStar[] = [];
-    const maxShootingStars = 2;
+    // Sleek Luminous Data Light Streaks
+    const streaks: DataStreak[] = [];
+    const maxStreaks = 2;
 
-    const spawnShootingStar = () => {
-      if (shootingStars.filter((s) => s.active).length < maxShootingStars && Math.random() < 0.015) {
-        shootingStars.push({
+    const spawnStreak = () => {
+      if (streaks.filter((s) => s.active).length < maxStreaks && Math.random() < 0.015) {
+        streaks.push({
           x: Math.random() * width * 1.2,
-          y: Math.random() * (height * 0.4),
-          length: Math.random() * 100 + 70,
-          speed: Math.random() * 7 + 9,
-          angle: (Math.PI / 4) + (Math.random() - 0.5) * 0.2,
+          y: Math.random() * (height * 0.35),
+          length: Math.random() * 110 + 70,
+          speed: Math.random() * 7 + 8,
+          angle: (Math.PI / 4) + (Math.random() - 0.5) * 0.15,
           alpha: 1.0,
           active: true,
-          color: Math.random() > 0.4 ? '#38bdf8' : '#a78bfa'
+          color: Math.random() > 0.5 ? '#38bdf8' : '#818cf8'
         });
       }
     };
@@ -132,148 +147,174 @@ export function ParticleBackground() {
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
-      time += 0.015;
+      time += 0.012;
+      const dayMode = isDayRef.current;
+      const palette = dayMode ? dayPalette : nightPalette;
 
-      // Mouse position smooth lerp
+      // Smooth mouse lerp
       mouse.x += (mouse.targetX - mouse.x) * 0.12;
       mouse.y += (mouse.targetY - mouse.y) * 0.12;
 
-      // 1. Draw Organic Nebula Aura Glows
-      const aura1X = width * 0.25 + Math.sin(time * 0.4) * 80;
-      const aura1Y = height * 0.3 + Math.cos(time * 0.3) * 60;
-      const grad1 = ctx.createRadialGradient(aura1X, aura1Y, 10, aura1X, aura1Y, 400);
-      grad1.addColorStop(0, 'rgba(14, 165, 233, 0.06)');
-      grad1.addColorStop(0.5, 'rgba(59, 130, 246, 0.03)');
-      grad1.addColorStop(1, 'transparent');
-      ctx.fillStyle = grad1;
-      ctx.fillRect(0, 0, width, height);
+      // 1. SUBTLE AMBIENT AURORA GRADIENTS
+      if (!dayMode) {
+        // Deep Space Cyber Aurora 1
+        const aura1X = width * 0.25 + Math.sin(time * 0.3) * 80;
+        const aura1Y = height * 0.25 + Math.cos(time * 0.25) * 60;
+        const grad1 = ctx.createRadialGradient(aura1X, aura1Y, 10, aura1X, aura1Y, 450);
+        grad1.addColorStop(0, 'rgba(14, 165, 233, 0.08)');
+        grad1.addColorStop(0.5, 'rgba(59, 130, 246, 0.035)');
+        grad1.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad1;
+        ctx.fillRect(0, 0, width, height);
 
-      const aura2X = width * 0.75 + Math.cos(time * 0.35) * 90;
-      const aura2Y = height * 0.65 + Math.sin(time * 0.45) * 70;
-      const grad2 = ctx.createRadialGradient(aura2X, aura2Y, 10, aura2X, aura2Y, 450);
-      grad2.addColorStop(0, 'rgba(99, 102, 241, 0.05)');
-      grad2.addColorStop(0.5, 'rgba(34, 211, 238, 0.025)');
-      grad2.addColorStop(1, 'transparent');
-      ctx.fillStyle = grad2;
-      ctx.fillRect(0, 0, width, height);
+        // Deep Space Cyber Aurora 2
+        const aura2X = width * 0.75 + Math.cos(time * 0.3) * 90;
+        const aura2Y = height * 0.7 + Math.sin(time * 0.35) * 70;
+        const grad2 = ctx.createRadialGradient(aura2X, aura2Y, 10, aura2X, aura2Y, 480);
+        grad2.addColorStop(0, 'rgba(99, 102, 241, 0.07)');
+        grad2.addColorStop(0.5, 'rgba(147, 51, 234, 0.03)');
+        grad2.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad2;
+        ctx.fillRect(0, 0, width, height);
 
-      // 2. Draw Shooting Stars / Cyber Beams
-      spawnShootingStar();
-      for (let i = shootingStars.length - 1; i >= 0; i--) {
-        const star = shootingStars[i];
-        if (!star.active) continue;
+        // Luminous Data Streaks
+        spawnStreak();
+        for (let i = streaks.length - 1; i >= 0; i--) {
+          const s = streaks[i];
+          if (!s.active) continue;
 
-        star.x -= Math.cos(star.angle) * star.speed;
-        star.y += Math.sin(star.angle) * star.speed;
-        star.alpha -= 0.016;
+          s.x -= Math.cos(s.angle) * s.speed;
+          s.y += Math.sin(s.angle) * s.speed;
+          s.alpha -= 0.015;
 
-        if (star.alpha <= 0 || star.y > height || star.x < 0) {
-          star.active = false;
-          shootingStars.splice(i, 1);
-          continue;
+          if (s.alpha <= 0 || s.y > height || s.x < 0) {
+            s.active = false;
+            streaks.splice(i, 1);
+            continue;
+          }
+
+          const tailX = s.x + Math.cos(s.angle) * s.length;
+          const tailY = s.y - Math.sin(s.angle) * s.length;
+
+          const sGrad = ctx.createLinearGradient(s.x, s.y, tailX, tailY);
+          sGrad.addColorStop(0, s.color);
+          sGrad.addColorStop(1, 'transparent');
+
+          ctx.strokeStyle = sGrad;
+          ctx.lineWidth = 1.5;
+          ctx.globalAlpha = s.alpha;
+          ctx.beginPath();
+          ctx.moveTo(s.x, s.y);
+          ctx.lineTo(tailX, tailY);
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, 1.3, 0, Math.PI * 2);
+          ctx.fill();
         }
-
-        const tailX = star.x + Math.cos(star.angle) * star.length;
-        const tailY = star.y - Math.sin(star.angle) * star.length;
-
-        const starGrad = ctx.createLinearGradient(star.x, star.y, tailX, tailY);
-        starGrad.addColorStop(0, star.color);
-        starGrad.addColorStop(1, 'transparent');
-
-        ctx.strokeStyle = starGrad;
-        ctx.lineWidth = 1.5;
-        ctx.globalAlpha = star.alpha;
-        ctx.beginPath();
-        ctx.moveTo(star.x, star.y);
-        ctx.lineTo(tailX, tailY);
-        ctx.stroke();
-
-        // Glowing head of star
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, 1.4, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.globalAlpha = 1.0;
+      } else {
+        // Crisp Clean Daylight Skylight Halo
+        const sunX = width * 0.85;
+        const sunY = height * 0.15;
+        const skyGlow = ctx.createRadialGradient(sunX, sunY, 20, sunX, sunY, 480);
+        skyGlow.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+        skyGlow.addColorStop(0.5, 'rgba(224, 242, 254, 0.2)');
+        skyGlow.addColorStop(1, 'transparent');
+        ctx.fillStyle = skyGlow;
+        ctx.fillRect(0, 0, width, height);
       }
-      ctx.globalAlpha = 1.0;
 
-      // 3. Connect Nearby Particles & Interactive Cursor Beams
-      const maxConnectDist = 120;
-      for (let i = 0; i < particles.length; i++) {
-        const p1 = particles[i];
+      // 2. UPDATE NODES
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        node.x += node.vx;
+        node.y += node.vy;
 
-        // Connect with nearby particles
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
+        if (node.x < 0) node.x = width;
+        if (node.x > width) node.x = 0;
+        if (node.y < 0) node.y = height;
+        if (node.y > height) node.y = 0;
+      }
+
+      // 3. DRAW DYNAMIC CONSTELLATION MESH LINES
+      const maxConnectDist = isMobile ? 100 : 130;
+      for (let i = 0; i < nodes.length; i++) {
+        const p1 = nodes[i];
+        for (let j = i + 1; j < nodes.length; j++) {
+          const p2 = nodes[j];
           const dx = p1.x - p2.x;
           const dy = p1.y - p2.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+          const dist = Math.hypot(dx, dy);
 
           if (dist < maxConnectDist) {
-            const lineAlpha = (1 - dist / maxConnectDist) * 0.16;
-            ctx.strokeStyle = `rgba(56, 189, 248, ${lineAlpha})`;
-            ctx.lineWidth = 0.65;
+            const proximity = 1 - dist / maxConnectDist;
+            const lineAlpha = proximity * (dayMode ? 0.2 : 0.16);
+
+            ctx.strokeStyle = dayMode
+              ? `rgba(2, 132, 199, ${lineAlpha})`
+              : `rgba(56, 189, 248, ${lineAlpha})`;
+            ctx.lineWidth = proximity * 0.8;
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
             ctx.stroke();
           }
         }
+      }
 
-        // Interactive Cursor Attraction & Glowing Beam
-        if (mouse.x > 0 && mouse.y > 0) {
-          const mdx = p1.x - mouse.x;
-          const mdy = p1.y - mouse.y;
-          const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+      // 4. INTERACTIVE CURSOR CONSTELLATION & ELASTIC DEFLECTION
+      if (mouse.x > 0 && mouse.y > 0) {
+        for (let i = 0; i < nodes.length; i++) {
+          const node = nodes[i];
+          const mdx = node.x - mouse.x;
+          const mdy = node.y - mouse.y;
+          const mDist = Math.hypot(mdx, mdy);
 
           if (mDist < mouse.radius) {
-            const mAlpha = (1 - mDist / mouse.radius) * 0.35;
-            ctx.strokeStyle = `rgba(34, 211, 238, ${mAlpha})`;
-            ctx.lineWidth = 0.9;
+            // Constellation line to cursor
+            const mProximity = 1 - mDist / mouse.radius;
+            const mAlpha = mProximity * (dayMode ? 0.35 : 0.3);
+
+            ctx.strokeStyle = dayMode
+              ? `rgba(37, 99, 235, ${mAlpha})`
+              : `rgba(34, 211, 238, ${mAlpha})`;
+            ctx.lineWidth = mProximity * 1.0;
             ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
+            ctx.moveTo(node.x, node.y);
             ctx.lineTo(mouse.x, mouse.y);
             ctx.stroke();
 
-            // Gentle repulsion push
-            const force = (mouse.radius - mDist) / mouse.radius;
-            p1.x += (mdx / mDist) * force * 0.8;
-            p1.y += (mdy / mDist) * force * 0.8;
+            // Smooth elastic deflection
+            node.x += (mdx / (mDist || 1)) * mProximity * 0.8;
+            node.y += (mdy / (mDist || 1)) * mProximity * 0.8;
           }
         }
       }
 
-      // 4. Update & Draw Particles with Breathing Glow
-      particles.forEach((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
+      // 5. DRAW NODES
+      nodes.forEach((node, idx) => {
+        const pal = palette[idx % palette.length];
+        const pulse = Math.sin(time * 2.5 + node.pulseOffset);
+        const dynamicRadius = node.baseRadius + pulse * 0.3;
 
-        // Wrap around viewport edges
-        if (p.x < 0) p.x = width;
-        if (p.x > width) p.x = 0;
-        if (p.y < 0) p.y = height;
-        if (p.y > height) p.y = 0;
-
-        // Pulsing radius & glow
-        const pulse = Math.sin(time * 3 + p.pulseOffset);
-        p.radius = p.baseRadius + pulse * 0.35;
-        const currentAlpha = Math.max(0.15, Math.min(0.85, p.alpha + pulse * 0.15));
-
-        // Soft Radial Glow Halo
-        const glowGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3);
-        glowGrad.addColorStop(0, p.glowColor);
+        // Soft Radial Glow
+        const glowRadius = dynamicRadius * (dayMode ? 3.5 : 4.0);
+        const glowGrad = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, glowRadius);
+        glowGrad.addColorStop(0, dayMode ? 'rgba(2, 132, 199, 0.35)' : pal.glow);
         glowGrad.addColorStop(1, 'transparent');
+
         ctx.fillStyle = glowGrad;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius * 3, 0, Math.PI * 2);
+        ctx.arc(node.x, node.y, glowRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Solid Core Particle
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = currentAlpha;
+        // Node Core
+        ctx.fillStyle = dayMode ? '#0284c7' : pal.fill;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, Math.max(0.5, p.radius), 0, Math.PI * 2);
+        ctx.arc(node.x, node.y, Math.max(0.7, dynamicRadius), 0, Math.PI * 2);
         ctx.fill();
-        ctx.globalAlpha = 1.0;
       });
 
       animationFrameId = requestAnimationFrame(render);
@@ -290,11 +331,34 @@ export function ParticleBackground() {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#020617]">
-      {/* Background Gradient Base */}
-      <div className="absolute inset-0 bg-radial-gradient from-blue-950/20 via-[#020617] to-[#01040f]" />
+    <div
+      className={`fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-700 ease-in-out ${
+        isDay
+          ? 'bg-gradient-to-b from-[#f0f9ff] via-[#e0f2fe] to-[#bae6fd]'
+          : 'bg-[#020617]'
+      }`}
+    >
+      {/* Ambient Gradient Base */}
+      <div
+        className={`absolute inset-0 transition-opacity duration-700 ${
+          isDay
+            ? 'opacity-60 bg-[radial-gradient(ellipse_70%_50%_at_80%_20%,rgba(255,255,255,0.6),transparent)]'
+            : 'opacity-100 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(14,165,233,0.12),transparent_70%),radial-gradient(ellipse_60%_50%_at_100%_100%,rgba(99,102,241,0.09),transparent_70%)]'
+        }`}
+      />
 
-      {/* Interactive Cyber Canvas */}
+      {/* Subtle Developer Circuit Dot Grid (Night Only) */}
+      {!isDay && (
+        <div
+          className="absolute inset-0 opacity-[0.03] pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, #38bdf8 1px, transparent 0)`,
+            backgroundSize: '32px 32px'
+          }}
+        />
+      )}
+
+      {/* Interactive Constellation Mesh Canvas */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full block"
@@ -303,3 +367,11 @@ export function ParticleBackground() {
     </div>
   );
 }
+
+
+
+
+
+
+
+

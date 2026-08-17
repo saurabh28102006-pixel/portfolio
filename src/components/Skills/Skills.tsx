@@ -5,8 +5,10 @@ import { portfolioData } from '@/data/portfolio';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { SkillCategory } from './SkillCategory';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '@/context/ThemeContext';
 
 export function Skills() {
+  const { isDay } = useTheme();
   const [activeFilter, setActiveFilter] = useState<string>('all');
 
   const categories = portfolioData.skills;
@@ -29,7 +31,9 @@ export function Skills() {
           className={`px-4 py-2 rounded-xl text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
             activeFilter === 'all'
               ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-cyan-500/25 scale-105'
-              : 'bg-[#061426] text-slate-400 hover:text-white border border-blue-500/20 hover:border-cyan-400/50'
+              : isDay
+                ? 'bg-white/80 hover:bg-white text-slate-700 hover:text-blue-700 border border-sky-200 hover:border-blue-400 shadow-sm'
+                : 'bg-[#061426] text-slate-400 hover:text-white border border-blue-500/20 hover:border-cyan-400/50'
           }`}
         >
           All Domains ({categories.length})
@@ -42,7 +46,9 @@ export function Skills() {
             className={`px-4 py-2 rounded-xl text-xs font-mono font-medium transition-all duration-200 cursor-pointer ${
               activeFilter === cat.id
                 ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-cyan-500/25 scale-105'
-                : 'bg-[#061426] text-slate-400 hover:text-white border border-blue-500/20 hover:border-cyan-400/50'
+                : isDay
+                  ? 'bg-white/80 hover:bg-white text-slate-700 hover:text-blue-700 border border-sky-200 hover:border-blue-400 shadow-sm'
+                  : 'bg-[#061426] text-slate-400 hover:text-white border border-blue-500/20 hover:border-cyan-400/50'
             }`}
           >
             {cat.title.split(' ')[0]}

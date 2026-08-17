@@ -1,7 +1,10 @@
+'use client';
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Certificate } from '@/data/portfolio';
 import { Award, FileText, Calendar, ArrowUpRight } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
 
 interface CertificateCardProps {
   certificate: Certificate;
@@ -10,13 +13,14 @@ interface CertificateCardProps {
 }
 
 export function CertificateCard({ certificate, index, onSelect }: CertificateCardProps) {
+  const { isDay } = useTheme();
+
   const handleOpenPdf = (e: React.MouseEvent) => {
     e.stopPropagation();
     const url = certificate.pdfUrl || certificate.credentialUrl;
     if (url) {
       window.open(url, '_blank');
     }
-    onSelect(certificate);
   };
 
   return (
@@ -25,8 +29,12 @@ export function CertificateCard({ certificate, index, onSelect }: CertificateCar
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.08 }}
-      className="p-6 rounded-2xl bg-[#061426] hover:bg-[#0A1B32] border border-blue-500/20 hover:border-cyan-400/60 transition-all duration-300 shadow-md shadow-blue-950/20 hover:shadow-cyan-500/15 hover:-translate-y-1 group flex flex-col justify-between space-y-6 cursor-pointer"
-      onClick={handleOpenPdf}
+      className={`p-6 rounded-2xl transition-all duration-300 shadow-md hover:-translate-y-1 group flex flex-col justify-between space-y-6 cursor-pointer card-hover-sheen ${
+        isDay
+          ? 'bg-white/80 hover:bg-white/95 border border-sky-200/80 shadow-sky-900/5 hover:shadow-sky-400/20'
+          : 'bg-[#061426] hover:bg-[#0A1B32] border border-blue-500/20 hover:border-cyan-400/60 shadow-blue-950/20 hover:shadow-cyan-500/15'
+      }`}
+      onClick={() => onSelect(certificate)}
     >
       <div className="space-y-4">
         {/* Top Issuer Badge & Date */}
@@ -42,18 +50,24 @@ export function CertificateCard({ certificate, index, onSelect }: CertificateCar
             <Award className="w-6 h-6" />
           </div>
 
-          <div className="flex items-center gap-1 text-xs font-mono text-slate-400 bg-[#020617] px-2.5 py-1 rounded-lg border border-blue-500/15">
-            <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+          <div className={`flex items-center gap-1 text-xs font-mono px-2.5 py-1 rounded-lg border ${
+            isDay ? 'text-slate-700 bg-sky-50 border-sky-200' : 'text-slate-400 bg-[#020617] border-blue-500/15'
+          }`}>
+            <Calendar className={`w-3.5 h-3.5 ${isDay ? 'text-blue-600' : 'text-cyan-400'}`} />
             <span>{certificate.issueDate}</span>
           </div>
         </div>
 
         {/* Title & Issuer */}
         <div>
-          <span className="text-xs font-mono font-semibold text-cyan-400/90 tracking-wide uppercase">
+          <span className={`text-xs font-mono font-semibold tracking-wide uppercase ${
+            isDay ? 'text-blue-700' : 'text-cyan-400/90'
+          }`}>
             {certificate.issuer}
           </span>
-          <h3 className="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors mt-0.5 leading-snug">
+          <h3 className={`text-lg font-bold transition-colors mt-0.5 leading-snug ${
+            isDay ? 'text-slate-900 group-hover:text-blue-600' : 'text-white group-hover:text-cyan-300'
+          }`}>
             {certificate.title}
           </h3>
         </div>
@@ -63,7 +77,11 @@ export function CertificateCard({ certificate, index, onSelect }: CertificateCar
           {certificate.topics.slice(0, 3).map((topic, i) => (
             <span
               key={i}
-              className="px-2.5 py-1 rounded-md bg-[#020617] text-[11px] font-mono text-slate-300 border border-blue-500/15"
+              className={`px-2.5 py-1 rounded-md text-[11px] font-mono border transition-colors ${
+                isDay
+                  ? 'bg-sky-50 text-slate-800 border-sky-200'
+                  : 'bg-[#020617] text-slate-300 border-blue-500/15'
+              }`}
             >
               {topic}
             </span>
@@ -72,7 +90,12 @@ export function CertificateCard({ certificate, index, onSelect }: CertificateCar
       </div>
 
       {/* Card Action */}
-      <div className="pt-4 border-t border-blue-500/20 flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-cyan-300 group-hover:text-cyan-200">
+      <div
+        onClick={handleOpenPdf}
+        className={`pt-4 border-t flex items-center justify-between text-xs font-semibold uppercase tracking-wider ${
+          isDay ? 'border-sky-100 text-blue-700 group-hover:text-blue-900' : 'border-blue-500/20 text-cyan-300 group-hover:text-cyan-200'
+        }`}
+      >
         <span className="flex items-center gap-1.5">
           <FileText className="w-3.5 h-3.5" />
           <span>Open PDF Certificate</span>
@@ -82,3 +105,4 @@ export function CertificateCard({ certificate, index, onSelect }: CertificateCar
     </motion.div>
   );
 }
+

@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '@/context/ThemeContext';
 
 interface AudioPlayerProps {
   is3DOpen?: boolean;
 }
 
 export function AudioPlayer({ is3DOpen = false }: AudioPlayerProps) {
+  const { isDay } = useTheme();
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const userHasPausedRef = useRef(false);
@@ -108,8 +110,12 @@ export function AudioPlayer({ is3DOpen = false }: AudioPlayerProps) {
               aria-label={isPlaying ? 'Mute Background Music' : 'Play Background Music'}
               className={`group relative w-11 h-11 sm:w-12 sm:h-12 rounded-full border flex items-center justify-center transition-all duration-300 backdrop-blur-xl shadow-2xl cursor-pointer select-none hover:scale-110 active:scale-95 ${
                 isPlaying
-                  ? 'bg-[#0a192f]/75 border-white/50 hover:border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)]'
-                  : 'bg-[#020617]/70 border-white/20 hover:border-white/50 text-white/50 hover:text-white'
+                  ? isDay
+                    ? 'bg-white/90 border-sky-300 shadow-[0_0_20px_rgba(56,189,248,0.4)]'
+                    : 'bg-[#0a192f]/75 border-white/50 hover:border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)]'
+                  : isDay
+                    ? 'bg-white/60 border-sky-200/80 text-slate-500 hover:text-slate-900 shadow-md'
+                    : 'bg-[#020617]/70 border-white/20 hover:border-white/50 text-white/50 hover:text-white'
               }`}
             >
               {/* Animated 4 Equalizer Wave Bars */}
@@ -117,32 +123,48 @@ export function AudioPlayer({ is3DOpen = false }: AudioPlayerProps) {
                 <span
                   className={`w-[2.5px] rounded-full transition-all duration-300 ${
                     isPlaying
-                      ? 'bg-white shadow-[0_0_8px_#ffffff] animate-music-bar-1'
-                      : 'bg-white/40 h-[3px]'
+                      ? isDay
+                        ? 'bg-blue-600 shadow-[0_0_6px_rgba(37,99,235,0.6)] animate-music-bar-1'
+                        : 'bg-white shadow-[0_0_8px_#ffffff] animate-music-bar-1'
+                      : isDay
+                        ? 'bg-slate-400 h-[3px]'
+                        : 'bg-white/40 h-[3px]'
                   }`}
                   style={{ height: isPlaying ? undefined : '3px' }}
                 />
                 <span
                   className={`w-[2.5px] rounded-full transition-all duration-300 ${
                     isPlaying
-                      ? 'bg-white shadow-[0_0_8px_#ffffff] animate-music-bar-2'
-                      : 'bg-white/40 h-[6px]'
+                      ? isDay
+                        ? 'bg-blue-600 shadow-[0_0_6px_rgba(37,99,235,0.6)] animate-music-bar-2'
+                        : 'bg-white shadow-[0_0_8px_#ffffff] animate-music-bar-2'
+                      : isDay
+                        ? 'bg-slate-400 h-[6px]'
+                        : 'bg-white/40 h-[6px]'
                   }`}
                   style={{ height: isPlaying ? undefined : '6px' }}
                 />
                 <span
                   className={`w-[2.5px] rounded-full transition-all duration-300 ${
                     isPlaying
-                      ? 'bg-white shadow-[0_0_8px_#ffffff] animate-music-bar-3'
-                      : 'bg-white/40 h-[3px]'
+                      ? isDay
+                        ? 'bg-blue-600 shadow-[0_0_6px_rgba(37,99,235,0.6)] animate-music-bar-3'
+                        : 'bg-white shadow-[0_0_8px_#ffffff] animate-music-bar-3'
+                      : isDay
+                        ? 'bg-slate-400 h-[3px]'
+                        : 'bg-white/40 h-[3px]'
                   }`}
                   style={{ height: isPlaying ? undefined : '3px' }}
                 />
                 <span
                   className={`w-[2.5px] rounded-full transition-all duration-300 ${
                     isPlaying
-                      ? 'bg-white shadow-[0_0_8px_#ffffff] animate-music-bar-4'
-                      : 'bg-white/40 h-[8px]'
+                      ? isDay
+                        ? 'bg-blue-600 shadow-[0_0_6px_rgba(37,99,235,0.6)] animate-music-bar-4'
+                        : 'bg-white shadow-[0_0_8px_#ffffff] animate-music-bar-4'
+                      : isDay
+                        ? 'bg-slate-400 h-[8px]'
+                        : 'bg-white/40 h-[8px]'
                   }`}
                   style={{ height: isPlaying ? undefined : '8px' }}
                 />
@@ -150,7 +172,9 @@ export function AudioPlayer({ is3DOpen = false }: AudioPlayerProps) {
 
               {/* Glowing Pulse Ring when playing */}
               {isPlaying && (
-                <span className="absolute inset-0 rounded-full border border-cyan-400/30 animate-ping pointer-events-none" />
+                <span className={`absolute inset-0 rounded-full border animate-ping pointer-events-none ${
+                  isDay ? 'border-blue-400/40' : 'border-cyan-400/30'
+                }`} />
               )}
             </button>
           </motion.div>
@@ -159,3 +183,4 @@ export function AudioPlayer({ is3DOpen = false }: AudioPlayerProps) {
     </>
   );
 }
+

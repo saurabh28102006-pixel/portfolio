@@ -34,7 +34,7 @@ export function ThreeDPortfolioModal({ isOpen, onClose }: ThreeDPortfolioModalPr
 
           {/* Fullscreen 3D Voyage Portfolio Frame */}
           <iframe
-            src="/voyage/index.html?v=7"
+            src="/voyage/index.html?v=9"
             title="3D Voyage Interactive Portfolio"
             className="w-full h-full border-0 block"
             allow="autoplay; fullscreen; accelerometer; gyroscope"

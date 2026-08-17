@@ -4,8 +4,10 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Send, CheckCircle2, Mail } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useTheme } from '@/context/ThemeContext';
 
 export function ContactForm() {
+  const { isDay } = useTheme();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -66,20 +68,26 @@ export function ContactForm() {
 
   if (isSubmitted) {
     return (
-      <div className="p-8 rounded-3xl bg-[#061426] border border-cyan-400/40 text-center space-y-4 shadow-xl shadow-cyan-500/10">
-        <div className="w-12 h-12 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto">
+      <div className={`p-8 rounded-3xl text-center space-y-4 shadow-xl ${
+        isDay
+          ? 'bg-white/90 border border-sky-300 shadow-sky-900/10'
+          : 'bg-[#061426] border border-cyan-400/40 shadow-cyan-500/10'
+      }`}>
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto ${
+          isDay ? 'bg-blue-100 text-blue-600' : 'bg-cyan-500/20 text-cyan-400'
+        }`}>
           <CheckCircle2 className="w-6 h-6" />
         </div>
-        <h3 className="text-xl font-bold text-white">Message Dispatched!</h3>
-        <p className="text-sm text-slate-300 font-light max-w-md mx-auto">
-          Your message has been sent to <span className="text-cyan-300 font-mono">saurabh2732006@gmail.com</span>. I will review it and reply as soon as possible!
+        <h3 className={`text-xl font-bold ${isDay ? 'text-slate-900' : 'text-white'}`}>Message Dispatched!</h3>
+        <p className={`text-sm font-light max-w-md mx-auto ${isDay ? 'text-slate-700' : 'text-slate-300'}`}>
+          Your message has been sent to <span className={`font-mono font-bold ${isDay ? 'text-blue-700' : 'text-cyan-300'}`}>saurabh2732006@gmail.com</span>. I will review it and reply as soon as possible!
         </p>
         <button
           onClick={() => {
             setIsSubmitted(false);
             setFormData({ name: '', email: '', subject: '', message: '' });
           }}
-          className="text-xs font-mono text-cyan-400 hover:underline pt-2 block mx-auto"
+          className={`text-xs font-mono hover:underline pt-2 block mx-auto ${isDay ? 'text-blue-600' : 'text-cyan-400'}`}
         >
           Send another message
         </button>
@@ -90,13 +98,17 @@ export function ContactForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-6 sm:p-8 rounded-3xl bg-[#061426] border border-blue-500/20 shadow-xl shadow-blue-950/20 space-y-5"
+      className={`p-6 sm:p-8 rounded-3xl shadow-xl space-y-5 transition-all duration-300 ${
+        isDay
+          ? 'bg-white/80 border border-sky-200/80 shadow-sky-900/5'
+          : 'bg-[#061426] border border-blue-500/20 shadow-blue-950/20'
+      }`}
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-white">
+        <h3 className={`text-lg font-bold ${isDay ? 'text-slate-900' : 'text-white'}`}>
           Send a Message
         </h3>
-        <span className="text-xs font-mono text-cyan-400 flex items-center gap-1">
+        <span className={`text-xs font-mono flex items-center gap-1 ${isDay ? 'text-blue-700' : 'text-cyan-400'}`}>
           <Mail className="w-3.5 h-3.5" />
           <span>Direct to Gmail</span>
         </span>
@@ -104,8 +116,8 @@ export function ContactForm() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <label className="block text-xs font-mono text-slate-300">
-            Name <span className="text-cyan-400">*</span>
+          <label className={`block text-xs font-mono ${isDay ? 'text-slate-700 font-semibold' : 'text-slate-300'}`}>
+            Name <span className={isDay ? 'text-blue-600' : 'text-cyan-400'}>*</span>
           </label>
           <input
             type="text"
@@ -113,13 +125,17 @@ export function ContactForm() {
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="Your Name"
-            className="w-full px-4 py-3 rounded-xl bg-[#020617] border border-blue-500/30 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all font-sans"
+            className={`w-full px-4 py-3 rounded-xl border text-base sm:text-sm focus:outline-none focus:ring-1 transition-all font-sans ${
+              isDay
+                ? 'bg-sky-50/80 border-sky-200 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 focus:bg-white'
+                : 'bg-[#020617] border-blue-500/30 text-white placeholder-slate-500 focus:border-cyan-400 focus:ring-cyan-400'
+            }`}
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-mono text-slate-300">
-            Email <span className="text-cyan-400">*</span>
+          <label className={`block text-xs font-mono ${isDay ? 'text-slate-700 font-semibold' : 'text-slate-300'}`}>
+            Email <span className={isDay ? 'text-blue-600' : 'text-cyan-400'}>*</span>
           </label>
           <input
             type="email"
@@ -127,25 +143,33 @@ export function ContactForm() {
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             placeholder="you@domain.com"
-            className="w-full px-4 py-3 rounded-xl bg-[#020617] border border-blue-500/30 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all font-sans"
+            className={`w-full px-4 py-3 rounded-xl border text-base sm:text-sm focus:outline-none focus:ring-1 transition-all font-sans ${
+              isDay
+                ? 'bg-sky-50/80 border-sky-200 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 focus:bg-white'
+                : 'bg-[#020617] border-blue-500/30 text-white placeholder-slate-500 focus:border-cyan-400 focus:ring-cyan-400'
+            }`}
           />
         </div>
       </div>
 
       <div className="space-y-1.5">
-        <label className="block text-xs font-mono text-slate-300">Subject</label>
+        <label className={`block text-xs font-mono ${isDay ? 'text-slate-700 font-semibold' : 'text-slate-300'}`}>Subject</label>
         <input
           type="text"
           value={formData.subject}
           onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
           placeholder="Project collaboration, inquiry, security research..."
-          className="w-full px-4 py-3 rounded-xl bg-[#020617] border border-blue-500/30 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all font-sans"
+          className={`w-full px-4 py-3 rounded-xl border text-base sm:text-sm focus:outline-none focus:ring-1 transition-all font-sans ${
+            isDay
+              ? 'bg-sky-50/80 border-sky-200 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 focus:bg-white'
+              : 'bg-[#020617] border-blue-500/30 text-white placeholder-slate-500 focus:border-cyan-400 focus:ring-cyan-400'
+          }`}
         />
       </div>
 
       <div className="space-y-1.5">
-        <label className="block text-xs font-mono text-slate-300">
-          Message <span className="text-cyan-400">*</span>
+        <label className={`block text-xs font-mono ${isDay ? 'text-slate-700 font-semibold' : 'text-slate-300'}`}>
+          Message <span className={isDay ? 'text-blue-600' : 'text-cyan-400'}>*</span>
         </label>
         <textarea
           required
@@ -153,7 +177,11 @@ export function ContactForm() {
           value={formData.message}
           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
           placeholder="Write your message here..."
-          className="w-full px-4 py-3 rounded-xl bg-[#020617] border border-blue-500/30 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all font-sans resize-none"
+          className={`w-full px-4 py-3 rounded-xl border text-base sm:text-sm focus:outline-none focus:ring-1 transition-all font-sans resize-none ${
+            isDay
+              ? 'bg-sky-50/80 border-sky-200 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 focus:bg-white'
+              : 'bg-[#020617] border-blue-500/30 text-white placeholder-slate-500 focus:border-cyan-400 focus:ring-cyan-400'
+          }`}
         />
       </div>
 
@@ -170,3 +198,4 @@ export function ContactForm() {
     </form>
   );
 }
+
